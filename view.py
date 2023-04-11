@@ -22,6 +22,7 @@ class View():
         self.template_path = template_path
         self.template_extension = template_extension
         self.global_renders = kwargs
+        self.header = "header"
 
 
     def __call__(self, *args, **kwargs):
@@ -29,9 +30,12 @@ class View():
             Call defaults to load and render
         '''
         return self.load_and_render(*args, **kwargs)
+    
+    def change_header(self, header: str):
+        self.header = header
 
 
-    def load_and_render(self, filename, header="header", tailer="tailer", **kwargs):
+    def load_and_render(self, filename, tailer="tailer", **kwargs):
         ''' 
             Loads and renders templates
 
@@ -41,7 +45,7 @@ class View():
             :: kwargs :: Keyword arguments to pass
         '''
         body_template = self.load_template(filename)
-        header_template = self.load_template(header)
+        header_template = self.load_template(self.header)
         tailer_template = self.load_template(tailer)
 
         rendered_template = self.render(

@@ -7,9 +7,12 @@
 '''
 import view
 import random
-
+import sql
 # Initialise our views, all arguments are defaults for the template
 page_view = view.View()
+database_args = ":sql.db:"
+sql_db = sql.SQLDatabase(database_args)
+sql_db.database_setup("password")
 
 #-----------------------------------------------------------------------------
 # Index
@@ -21,6 +24,65 @@ def index():
         Returns the view for the index
     '''
     return page_view("index")
+
+
+#-----------------------------------------------------------------------------
+# Sign up
+#-----------------------------------------------------------------------------
+
+def sign_up_form():
+    '''
+        sign_up_form
+        Returns the view for the sign_up_form
+    '''
+    return page_view("sign_up")
+
+#-----------------------------------------------------------------------------
+
+# Check the sign up credentials
+def sign_up_check(username, password):
+    '''
+        sign_up_check
+        Store usernames and passwords
+
+        :: username :: The username
+        :: password :: The password
+
+        Returns either a view for valid credentials, or a view for invalid credentials
+    '''
+
+    sign_up =True
+    err_str="User already exists"
+    # # By default assume good creds
+    # login = True
+    # err_str = "Incorrect password or username" 
+    
+    
+    # # if username != "admin": # Wrong Username
+    # #     err_str = "Incorrect Username"
+    # #     login = False
+    
+    # # if password != "password": # Wrong password
+    # #     err_str = "Incorrect Password"
+    # #     login = False
+        
+    # print(username)
+        
+    # if sql_db.check_credentials(username, password) != True:
+    #     login = False
+    
+    # if login: 
+    #     return page_view("valid", name=username)
+    # else:
+    #     return page_view("invalid", reason=err_str)
+
+    sign_up = sql_db.add_user(username, password, 0)
+    
+    if sign_up:
+        return page_view("valid", name=username)
+    else:
+        return page_view("invalid", reason=err_str)
+
 
 #-----------------------------------------------------------------------------
 # Login
@@ -50,18 +112,52 @@ def login_check(username, password):
     # By default assume good creds
     login = True
     
-    if username != "admin": # Wrong Username
+    
+    # if username != "admin": # Wrong Username
+    #     err_str = "Incorrect Username"
+    #     login = False
+    
+    # if password != "password": # Wrong password
+    #     err_str = "Incorrect Password"
+    #     login = False
+        
+    if sql_db.check_user_exists(username=username) != True:
         err_str = "Incorrect Username"
         login = False
-    
-    if password != "password": # Wrong password
+        
+    elif sql_db.check_credentials(username, password) != True:
         err_str = "Incorrect Password"
         login = False
-        
+    
     if login: 
         return page_view("valid", name=username)
     else:
         return page_view("invalid", reason=err_str)
+
+#-----------------------------------------------------------------------------
+# User
+#-----------------------------------------------------------------------------
+
+def user():
+    '''
+        user
+        Returns the view for the index after login
+    '''
+    page_view.change_header("user")
+    return page_view("index")
+
+
+#-----------------------------------------------------------------------------
+# Logout
+#-----------------------------------------------------------------------------
+
+def logout():
+    '''
+        logout
+        Returns the view for the index after logout
+    '''
+    page_view.change_header("header")
+    return page_view("index")
 
 #-----------------------------------------------------------------------------
 # About

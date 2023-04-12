@@ -8,11 +8,42 @@
 import view
 import random
 import sql
+import hashlib
+
 # Initialise our views, all arguments are defaults for the template
 page_view = view.View()
 database_args = ":sql.db:"
 sql_db = sql.SQLDatabase(database_args)
 sql_db.database_setup("password")
+
+#-----------------------------------------------------------------------------
+# Hash
+#-----------------------------------------------------------------------------
+def salt_hash(string):
+    '''
+        salt_hash
+        Returns the hash value of a given string using string concatenation as the salt
+    '''
+    salt = "extremelysecureextremely"
+
+    return hashlib.sha256((salt + string).encode()).hexdigest()
+
+def compare_string_to_hash(string, hash):
+    '''
+        compare_string_to_hash
+        Returns true if the string corresponds to the hash value
+    '''
+    hashed_string = salt_hash(string)
+
+    if hashed_string == hash:
+        return True
+
+    return False
+
+#-----------------------------------------------------------------------------
+# Key Generation
+#-----------------------------------------------------------------------------
+
 
 #-----------------------------------------------------------------------------
 # Index

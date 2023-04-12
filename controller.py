@@ -85,6 +85,7 @@ def get_login_controller():
     '''
     return model.login_form()
 
+
 #-----------------------------------------------------------------------------
 
 # Attempt the login
@@ -104,7 +105,60 @@ def post_login():
     # Call the appropriate method
     return model.login_check(username, password)
 
+#-----------------------------------------------------------------------------
 
+# Display the sign up page
+@get('/sign_up')
+def get_sign_up_controller():
+    '''
+        get_sign_up
+        
+        Serves the sign_up page
+    '''
+    return model.sign_up_form()
+
+#-----------------------------------------------------------------------------
+
+# Attempt the sign up
+@post('/sign_up')
+def post_sign_up():
+    '''
+        post_sign_up
+        
+        Handles sign up attempts
+        Expects a form containing 'username' and 'password' fields
+    '''
+
+    # Handle the form processing
+    username = request.forms.get('username')
+    password = request.forms.get('password')
+    
+    # Call the appropriate method
+    return model.sign_up_check(username, password)
+
+#-----------------------------------------------------------------------------
+
+# Redirect to user page
+@post('/valid')
+def post_valid():
+    '''
+        post_valid
+    '''
+    
+    # Call the appropriate method
+    return model.user()
+
+#-----------------------------------------------------------------------------
+
+# Attempt logout
+@get('/logout')
+def get_logout_controller():
+    '''
+        get_logout
+        
+        Logtout from current user
+    '''
+    return model.logout()
 
 #-----------------------------------------------------------------------------
 

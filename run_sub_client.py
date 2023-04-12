@@ -15,7 +15,6 @@
 #-----------------------------------------------------------------------------
 import os
 import sys
-import socket
 from bottle import run
 
 #-----------------------------------------------------------------------------
@@ -35,10 +34,7 @@ import controller
 host = 'localhost'
 
 # Test port, change to the appropriate port to host
-sock = socket.socket()
-sock.bind(('', 0))
-port = sock.getsockname()[1]
-sock.close()
+port = 8082
 
 # Turn this off for production
 debug = True
@@ -69,22 +65,11 @@ def manage_db():
         manage_db
         Starts up and re-initialises an SQL databse for the server
     '''
-    database_args = ":sql.db:"
+    database_args = ":sql.db:" # Currently runs in RAM, might want to change this to a file if you use it
     sql_db = sql.SQLDatabase(database_args)
 
     return
 
-def wipe_db():
-    '''
-        wipe_db
-        Wipe everything on SQL database
-    '''
-    database_args = ":sql.db:"
-    sql_db = sql.SQLDatabase(database_args)
-    sql_db.database_wipe()
-    print("All data wiped.")
-
-    return
 
 #-----------------------------------------------------------------------------
 
@@ -93,8 +78,7 @@ def wipe_db():
 
 command_list = {
     'manage_db' : manage_db,
-    'server'       : run_server,
-    'wipe_db' : wipe_db
+    'server'       : run_server
 }
 
 # The default command if none other is given

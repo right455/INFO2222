@@ -98,6 +98,7 @@ class SQLDatabase():
 
     #-----------------------------------------------------------------------------
 
+
     # Check login credentials
     def check_credentials(self, username, password):
         sql_query = """

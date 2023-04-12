@@ -105,6 +105,8 @@ def post_login():
     # Call the appropriate method
     return model.login_check(username, password)
 
+# Client  --> Encrypts --> Server (plaintext) --> Client --> Decrypts 
+
 #-----------------------------------------------------------------------------
 
 # Display the sign up page

@@ -50,7 +50,7 @@ def run_server():
         run_server
         Runs a bottle server
     '''
-    run(host=host, port=port, debug=debug, interval=10, server='gevent', reloader=False, certfile='localhost.crt', keyfile='localhost.key')
+    run(host=host, port=port, debug=debug, interval=10, server='gevent', reloader=False, certfile='./certificates/localhost.crt', keyfile='./certificates/localhost.key')
 
 #-----------------------------------------------------------------------------
 # Optional SQL support

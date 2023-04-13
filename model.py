@@ -8,6 +8,8 @@
 import view
 import random
 import sql
+import crypto
+
 # Initialise our views, all arguments are defaults for the template
 page_view = view.View()
 database_args = ":sql.db:"

@@ -50,19 +50,23 @@ class SQLDatabase():
         # self.commit()
 
         # Create the users table
-        self.execute("""CREATE TABLE Users(
+        self.execute("""CREATE TABLE IF NOT EXISTS Users(
             Id INT,
             username TEXT,
             password TEXT,
-            admin INTEGER DEFAULT 0
+            admin INTEGER DEFAULT 0,
+            status INTEGER DEFAULT 0
         )""")
 
         self.commit()
 
-        # Add our admin user
-        self.add_user('admin', admin_password, admin=1)
+        # Add our admin user if not exist
+        if self.check_user_exists('admin') != True:
+            self.add_user('admin', admin_password, admin=1)
         
 
+    #-----------------------------------------------------------------------------
+    
     def database_wipe(self):
         
         # Clear the database if needed
@@ -87,10 +91,11 @@ class SQLDatabase():
             
             sql_cmd = """
                     INSERT INTO Users
-                    VALUES({id}, '{username}', '{password}', {admin})
+                    VALUES({id}, '{username}', '{password}', {admin}, {status})
                 """
 
-            sql_cmd = sql_cmd.format(id=id, username=username, password=password, admin=admin)
+            sql_cmd = sql_cmd.format(id=id, username=username, 
+                                     password=password, admin=admin, status=0)
 
             self.execute(sql_cmd)
             self.commit()
@@ -131,3 +136,54 @@ class SQLDatabase():
         
         else:
             return False
+        
+    #-----------------------------------------------------------------------------
+
+    # Check user online status
+    def check_user_online(self, username):
+        sql_query = """
+                SELECT 1 
+                FROM Users
+                WHERE username = '{username}' AND status = 1
+            """
+        sql_query = sql_query.format(username=username)
+        self.execute(sql_query)
+        if self.cur.fetchone():
+            return True
+        
+        else:
+            return False
+        
+    #-----------------------------------------------------------------------------
+    
+    # change user status to online
+    def login_user(self, username):
+        sql_query = """
+                UPDATE Users
+                SET status = 1
+                WHERE username = '{username}'
+            """
+        sql_query = sql_query.format(username=username)
+        self.execute(sql_query)
+        self.commit()
+        return True
+
+    #-----------------------------------------------------------------------------
+    
+    # change user status to offline
+    def logout_user(self, username):
+        sql_query = """
+                UPDATE Users
+                SET status = 0
+                WHERE username = '{username}'
+            """
+        sql_query = sql_query.format(username=username)
+        self.execute(sql_query)
+        self.commit()
+        return True
+    
+    
+    def get_users(self):
+        with self.conn:
+            self.cur.execute("SELECT * FROM Users")
+            print(self.cur.fetchall())

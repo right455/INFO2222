@@ -4,7 +4,7 @@
     maybe some simple program logic
 '''
 
-from bottle import route, get, post, error, request, static_file
+from bottle import route, get, post, error, request, static_file, response
 
 import model
 
@@ -102,7 +102,9 @@ def post_login():
     username = request.forms.get('username')
     password = request.forms.get('password')
     
+    
     # Call the appropriate method
+    response.set_cookie('username', username)
     return model.login_check(username, password)
 
 
@@ -135,6 +137,7 @@ def post_sign_up():
     password = request.forms.get('password')
     
     # Call the appropriate method
+    response.set_cookie('username', username)
     return model.sign_up_check(username, password)
 
 #-----------------------------------------------------------------------------
@@ -159,7 +162,8 @@ def get_logout_controller():
         
         Logtout from current user
     '''
-    return model.logout()
+    username = request.get_cookie('username')
+    return model.logout(username)
 
 #-----------------------------------------------------------------------------
 

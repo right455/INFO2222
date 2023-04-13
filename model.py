@@ -55,32 +55,11 @@ def sign_up_check(username, password):
 
     sign_up =True
     err_str="User already exists"
-    # # By default assume good creds
-    # login = True
-    # err_str = "Incorrect password or username" 
-    
-    
-    # # if username != "admin": # Wrong Username
-    # #     err_str = "Incorrect Username"
-    # #     login = False
-    
-    # # if password != "password": # Wrong password
-    # #     err_str = "Incorrect Password"
-    # #     login = False
-        
-    # print(username)
-        
-    # if sql_db.check_credentials(username, password) != True:
-    #     login = False
-    
-    # if login: 
-    #     return page_view("valid", name=username)
-    # else:
-    #     return page_view("invalid", reason=err_str)
-
     sign_up = sql_db.add_user(username, password, 0)
     
     if sign_up:
+        sql_db.login_user(username)
+        page_view.change_header("user")
         return page_view("valid", name=username)
     else:
         return page_view("invalid", reason=err_str)
@@ -114,15 +93,6 @@ def login_check(username, password):
     # By default assume good creds
     login = True
     
-    
-    # if username != "admin": # Wrong Username
-    #     err_str = "Incorrect Username"
-    #     login = False
-    
-    # if password != "password": # Wrong password
-    #     err_str = "Incorrect Password"
-    #     login = False
-        
     if sql_db.check_user_exists(username=username) != True:
         err_str = "Incorrect Username"
         login = False
@@ -131,33 +101,43 @@ def login_check(username, password):
         err_str = "Incorrect Password"
         login = False
     
-    if login: 
+    elif sql_db.check_user_online(username) == True:
+        err_str = "User Already Online"
+        login = False
+    
+    if login:
+        sql_db.login_user(username)
+        page_view.change_header("user")
         return page_view("valid", name=username)
     else:
         return page_view("invalid", reason=err_str)
 
 #-----------------------------------------------------------------------------
-# User
+# User Page
 #-----------------------------------------------------------------------------
 
-def user():
-    '''
-        user
-        Returns the view for the index after login
-    '''
-    page_view.change_header("user")
-    return page_view("index")
+# def user():
+#     '''
+#         user
+#         Returns the view for the index after login
+#     '''
+#     print(current_user)
+#     sql_db.login_user(current_user)
+#     page_view.change_header("user")
+#     sql_db.get_users()
+#     return page_view("index")
 
 
 #-----------------------------------------------------------------------------
 # Logout
 #-----------------------------------------------------------------------------
 
-def logout():
+def logout(username):
     '''
         logout
         Returns the view for the index after logout
     '''
+    sql_db.logout_user(username)
     page_view.change_header("header")
     return page_view("index")
 

@@ -16,6 +16,7 @@
 import os
 import sys
 import socket
+from gevent import monkey; monkey.patch_all()
 from bottle import run
 
 #-----------------------------------------------------------------------------
@@ -32,13 +33,14 @@ import controller
 
 # It might be a good idea to move the following settings to a config file and then load them
 # Change this to your IP address or 0.0.0.0 when actually hosting
-host = 'localhost'
+host = '127.0.0.1'
 
 # Test port, change to the appropriate port to host
-sock = socket.socket()
-sock.bind(('', 0))
-port = sock.getsockname()[1]
-sock.close()
+# sock = socket.socket()
+# sock.bind(('', 0))
+# port = sock.getsockname()[1]
+# sock.close()
+port = 8081
 
 # Turn this off for production
 debug = True
@@ -48,7 +50,7 @@ def run_server():
         run_server
         Runs a bottle server
     '''
-    run(host=host, port=port, debug=debug)
+    run(host=host, port=port, debug=debug, interval=10, server='gevent', reloader=False, certfile='localhost.crt', keyfile='localhost.key')
 
 #-----------------------------------------------------------------------------
 # Optional SQL support

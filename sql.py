@@ -8,7 +8,7 @@ from sqlite3 import Error
 
 class SQLDatabase():
     '''
-        Our SQL Database
+        Our SQL users Database
 
     '''
 
@@ -55,7 +55,8 @@ class SQLDatabase():
             username TEXT,
             password TEXT,
             admin INTEGER DEFAULT 0,
-            status INTEGER DEFAULT 0
+            status INTEGER DEFAULT 0,
+            public_key INTEGER DEFAULT 0
         )""")
 
         self.commit()
@@ -95,7 +96,7 @@ class SQLDatabase():
                 """
 
             sql_cmd = sql_cmd.format(id=id, username=username, 
-                                     password=password, admin=admin, status=0)
+                                     password=password, admin=admin, status=0, public_key=0)
 
             self.execute(sql_cmd)
             self.commit()
@@ -157,13 +158,14 @@ class SQLDatabase():
     #-----------------------------------------------------------------------------
     
     # change user status to online
-    def login_user(self, username):
+    def login_user(self, username, public_key):
         sql_query = """
                 UPDATE Users
-                SET status = 1
+                SET status = 1,
+                    public_key = '{public_key}'
                 WHERE username = '{username}'
             """
-        sql_query = sql_query.format(username=username)
+        sql_query = sql_query.format(username=username, public_key=public_key)
         self.execute(sql_query)
         self.commit()
         return True
@@ -182,8 +184,105 @@ class SQLDatabase():
         self.commit()
         return True
     
-    
     def get_users(self):
         with self.conn:
-            self.cur.execute("SELECT * FROM Users")
-            print(self.cur.fetchall())
+            try:
+                self.cur.execute("SELECT * FROM Users")
+                print(self.cur.fetchall())
+            except:
+                print("ERROR: Cannot get users from an empty table")
+
+class MSGDatabase():
+    '''
+        Our SQL message Database
+
+    '''
+
+    def __init__(self, database_arg: str):
+        try:
+            self.conn = sqlite3.connect(database_arg)
+            print("Connect to MSG DB success.")
+        except Error as e:
+            print(f"Exception: {e}")
+            
+        self.cur = self.conn.cursor()
+        self.id_counter = 1
+
+    def execute(self, sql_string: str):
+        out = None
+        for string in sql_string.split(";"):
+            try:
+                out = self.cur.execute(string)
+            except:
+                pass
+        return out
+
+    def commit(self):
+        self.conn.commit()
+
+    def database_setup(self):
+        # Create the messages table
+        self.execute("""CREATE TABLE IF NOT EXISTS Messages(
+            sender TEXT,
+            recipient TEXT,
+            message TEXT
+        )""")
+
+        self.commit()
+    
+    def add_message(self, sender, recipient, message, db):
+    
+        if (db.check_user_exists(username=sender) and db.check_user_exists(username=recipient)) == False:
+            print("ERROR: Either the sender or the recipient does not exist")
+            return False
+        
+        sql_cmd = """
+                INSERT INTO Messages
+                VALUES('{sender}', '{recipient}', '{message}')
+            """
+
+        sql_cmd = sql_cmd.format(sender = sender, recipient=recipient, message=message)
+
+        self.execute(sql_cmd)
+        self.commit()
+        return True
+
+    def delete_messages(self, sender, recipient):
+        sql_query = """
+            DELETE FROM Messages
+            WHERE sender = '{sender}' AND recipient = '{recipient}'
+        """
+        sql_query = sql_query.format(sender=sender, recipient=recipient)
+        self.cur.execute(sql_query)
+        self.conn.commit()
+
+        return;
+
+    def get_messages(self, sender, recipient, db):
+        if (db.check_user_exists(username=sender) and db.check_user_exists(username=recipient)) == False:
+            print("ERROR: Either the sender or the recipient does not exist")
+            return False
+
+        sql_query = """
+                SELECT * 
+                FROM Messages
+                WHERE sender = '{sender}' AND recipient = '{recipient}'
+            """
+
+        sql_query = sql_query.format(sender=sender, recipient=recipient)
+        self.cur.execute(sql_query)
+        messages = self.cur.fetchall()
+        self.delete_messages(sender, recipient)
+        return [message[2] for message in messages]
+
+        
+
+
+        
+    def print_table(self):
+        with self.conn:
+            try:
+                self.cur.execute("SELECT * FROM Messages")
+                print(self.cur.fetchall())
+            except:
+                print("ERROR: Cannot print messages from an empty table")

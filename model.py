@@ -8,13 +8,25 @@
 import view
 import random
 import sql
-#import crypto
+import crypto
 
 # Initialise our views, all arguments are defaults for the template
 page_view = view.View()
 database_args = ":sql.db:"
+msg_args = ":msg.db:"
 sql_db = sql.SQLDatabase(database_args)
+msg_db = sql.MSGDatabase(msg_args)
 sql_db.database_setup("password")
+msg_db.database_setup()
+#a, A = crypto.generate_keys()
+#sql_db.login_user("ashton", A)
+#sql_db.logout_user("ashton")
+#sql_db.get_users()
+#msg_db.add_message("admin", "ashton", "HELLO", sql_db)
+#msg_db.add_message("admin", "ashton", "There", sql_db)
+#msg_db.add_message("admin", "ashton", "Howdy", sql_db)
+#print(msg_db.get_messages("admin", "ashton", sql_db))
+#msg_db.print_table()
 
 #-----------------------------------------------------------------------------
 # Index

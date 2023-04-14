@@ -68,15 +68,15 @@ def encrypt(plaintext, key):
 #def decrypt(message, key):
 
 
-a, A = generate_keys()
-b, B = generate_keys()
+#a, A = generate_keys()
+#b, B = generate_keys()
 
 #print(a, A)
 #print(b, B)
 
 # Connection between Client1 and Client 2 -->  Generate Keys (public private) Client 1, Client 2 --> Send public keys to server
 # Sending messages
-print(compute_key(B, a))
-print(compute_key(A, b))
+#print(compute_key(B, a))
+#print(compute_key(A, b))
 
 #print(encrypt("Hey", compute_key(B, a)))

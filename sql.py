@@ -203,6 +203,18 @@ class SQLDatabase():
             except:
                 print("ERROR: Cannot get users from an empty table")
     
+    def get_friends(self, user):
+        #Get all usernames in database
+        with self.conn:
+            try:
+                self.cur.execute("SELECT * FROM Users")
+                friends = [username[0] for username in self.cur.execute(
+                    "SELECT username FROM Users")]
+                friends.remove(user)
+                return friends
+            except:
+                print("ERROR: Cannot get users from an empty table")
+    
     def get_public_key(self, username):
         if (self.check_user_exists(username=username)) == False:
             return 0
@@ -283,7 +295,7 @@ class MSGDatabase():
         self.cur.execute(sql_query)
         self.conn.commit()
 
-        return;
+        return
 
     def get_messages(self, recipient, db):
         if (db.check_user_exists(username=recipient)) == False:

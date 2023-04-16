@@ -205,6 +205,18 @@ def get_messages():
 
     return json.dumps(messages)
 
+
+@get('/get_friends')
+def get_friends():
+    user = request.get_cookie('username')
+    friends = model.get_friends(user)
+
+    # Convert the messages to JSON and return them
+    response.content_type = 'application/json'
+
+    return json.dumps(friends)
+
+
 @get('/get_public_key/<recipient>')
 def get_public_key(recipient):
     public_key = model.get_public_key(recipient)

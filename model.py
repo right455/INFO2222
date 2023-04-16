@@ -133,21 +133,6 @@ def login_check(username, password, public_key):
     else:
         return page_view("invalid", reason=err_str)
 
-#-----------------------------------------------------------------------------
-# User Page
-#-----------------------------------------------------------------------------
-
-# def user():
-#     '''
-#         user
-#         Returns the view for the index after login
-#     '''
-#     print(current_user)
-#     sql_db.login_user(current_user)
-#     page_view.change_header("user")
-#     sql_db.get_users()
-#     return page_view("index")
-
 
 #-----------------------------------------------------------------------------
 # Logout
@@ -186,6 +171,9 @@ def send_message(recipient, message, sender):
     msg_db.add_message(sender, recipient, message, sql_db)
     msg_db.print_table()
     return page_view("valid_message")  
+
+def get_friends(user):
+    return sql_db.get_friends(user)
 
 def get_message(recipient):
     return msg_db.get_messages(recipient, sql_db)

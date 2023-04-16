@@ -112,3 +112,28 @@ $(document).ready(function() {
         });
     });
 });
+
+
+$(document).ready(function() {
+    $("#get-friends").click(function() {
+        $.ajax({
+            url: "/get_friends",
+            method: "GET",
+            dataType: "json", // Add this line to expect JSON data from the server
+            success: function(data) {
+                console.log("Received data:", data);
+
+                let html = "";
+                for (let i = 0; i < data.length; i++) {
+                    //Print out each user in database
+                    html += "<p>" + data[i] + "</p>";
+                };
+
+                $("#friends-container").html(html);
+            },
+            error: function() {
+                console.log("Error fetching friends.");
+            }
+        });
+    });
+});

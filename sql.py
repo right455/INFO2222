@@ -56,7 +56,7 @@ class SQLDatabase():
             password TEXT,
             admin INTEGER DEFAULT 0,
             status INTEGER DEFAULT 0,
-            public_key INTEGER DEFAULT 0
+            public_key INTEGER DEFAULT 'None'
         )""")
 
         self.commit()
@@ -64,6 +64,8 @@ class SQLDatabase():
         # Add our admin user if not exist
         if self.check_user_exists('admin') != True:
             self.add_user('admin', admin_password, admin=1)
+        
+        self.logout_all()
         
 
     #-----------------------------------------------------------------------------
@@ -92,12 +94,12 @@ class SQLDatabase():
             
             sql_cmd = """
                     INSERT INTO Users
-                    VALUES({id}, '{username}', '{password}', {admin}, {status})
+                    VALUES({id}, '{username}', '{password}', {admin}, {status}, {public_key})
                 """
 
             sql_cmd = sql_cmd.format(id=id, username=username, 
                                      password=password, admin=admin, status=0, public_key=0)
-
+        
             self.execute(sql_cmd)
             self.commit()
             return True
@@ -183,6 +185,15 @@ class SQLDatabase():
         self.execute(sql_query)
         self.commit()
         return True
+
+    def logout_all(self):
+        sql_query = """
+                UPDATE Users
+                SET status = 0, public_key = 'None'
+            """
+        self.execute(sql_query)
+        self.commit()
+        return True
     
     def get_users(self):
         with self.conn:
@@ -191,6 +202,21 @@ class SQLDatabase():
                 print(self.cur.fetchall())
             except:
                 print("ERROR: Cannot get users from an empty table")
+    
+    def get_public_key(self, username):
+        if (self.check_user_exists(username=username)) == False:
+            return 0
+
+        sql_query = """
+                SELECT public_key 
+                FROM Users
+                WHERE username = '{username}'
+            """
+
+        sql_query = sql_query.format(username=username)
+        self.cur.execute(sql_query)
+        public_key = self.cur.fetchone()
+        return public_key
 
 class MSGDatabase():
     '''
@@ -245,39 +271,40 @@ class MSGDatabase():
 
         self.execute(sql_cmd)
         self.commit()
+        
         return True
 
-    def delete_messages(self, sender, recipient):
+    def delete_messages(self, recipient):
         sql_query = """
             DELETE FROM Messages
-            WHERE sender = '{sender}' AND recipient = '{recipient}'
+            WHERE recipient = '{recipient}'
         """
-        sql_query = sql_query.format(sender=sender, recipient=recipient)
+        sql_query = sql_query.format(recipient=recipient)
         self.cur.execute(sql_query)
         self.conn.commit()
 
         return;
 
-    def get_messages(self, sender, recipient, db):
-        if (db.check_user_exists(username=sender) and db.check_user_exists(username=recipient)) == False:
-            print("ERROR: Either the sender or the recipient does not exist")
-            return False
+    def get_messages(self, recipient, db):
+        if (db.check_user_exists(username=recipient)) == False:
+            return []
 
         sql_query = """
                 SELECT * 
                 FROM Messages
-                WHERE sender = '{sender}' AND recipient = '{recipient}'
+                WHERE recipient = '{recipient}'
             """
 
-        sql_query = sql_query.format(sender=sender, recipient=recipient)
+        sql_query = sql_query.format(recipient=recipient)
         self.cur.execute(sql_query)
         messages = self.cur.fetchall()
-        self.delete_messages(sender, recipient)
-        return [message[2] for message in messages]
+        self.delete_messages(recipient)
 
-        
+        ls = [message[2] for message in messages]
+        if len(ls) != 0:
+            ls.append(db.get_public_key(messages[0][0])[0])
 
-
+        return ls
         
     def print_table(self):
         with self.conn:
@@ -286,3 +313,9 @@ class MSGDatabase():
                 print(self.cur.fetchall())
             except:
                 print("ERROR: Cannot print messages from an empty table")
+
+    def database_wipe(self):
+        
+        # Clear the database if needed
+        self.execute("DROP TABLE IF EXISTS Messages")
+        self.commit()

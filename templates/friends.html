@@ -1,0 +1,25 @@
+<p>Welcome to the send message to friends page, here you can send an encrypted message to anyone currently registered in the database!
+    <br>
+    Now all you need to do is fill out the username of the person you are trying to type to and the associated message
+    <form action="/send_message" method="post">
+        <label for="recipient">Target Username:</label>
+        <input name="recipient" type="text" id="recipient" required />
+        <br />
+        <label for="message">Message:</label>
+        <input name="message" type="text" id="message" required />
+        <br />
+        <input value="Send Message" type="submit" />
+    </form>
+</p>
+
+
+<title>Get Messages</title>
+<body>
+    <h1>Get Messages</h1>
+    <button id="get-messages">Get Messages</button>
+    <div id="messages-container"></div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/js/script.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl/1.0.3/nacl.min.js"></script>
+<script src="/js/tweetnacl-util-js-0.15.0/nacl-util.min.js"></script>

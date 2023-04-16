@@ -1,13 +1,17 @@
 
-Sign up with a username and password
+    Sign up with a username and password
 </p>
 <p>
-<form action="/sign_up" method="post">
-    Username: <input name="username" type="text" />
-</br>
-    Password: <input name="password" type="password" />
-</br>
-    <input value="Sign up" type="submit" />
-</form>
+    <form action="/sign_up" method="post" onsubmit="login(event)">
+        Username: <input name="username" type="text" />
+    </br>
+        Password: <input name="password" type="password" />
+    </br>
+        <input name="public_key" type="hidden" />
+        <input value="Sign up" type="submit" />
+    </form>
 </p>
 </center>
+<script src="/js/forms.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl/1.0.3/nacl.min.js"></script>
+<script src="/js/tweetnacl-util-js-0.15.0/nacl-util.min.js"></script>

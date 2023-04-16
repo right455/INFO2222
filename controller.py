@@ -5,7 +5,7 @@
 '''
 
 from bottle import route, get, post, error, request, static_file, response
-
+import json
 import model
 
 #-----------------------------------------------------------------------------
@@ -71,7 +71,9 @@ def get_index():
         
         Serves the index page
     '''
-    return model.index()
+    username = request.get_cookie('username')
+
+    return model.index(username)
 
 #-----------------------------------------------------------------------------
 
@@ -101,11 +103,12 @@ def post_login():
     # Handle the form processing
     username = request.forms.get('username')
     password = request.forms.get('password')
+    public_key = request.forms.get('public_key')
     
     
     # Call the appropriate method
     response.set_cookie('username', username)
-    return model.login_check(username, password)
+    return model.login_check(username, password, public_key)
 
 
 #-----------------------------------------------------------------------------
@@ -135,10 +138,12 @@ def post_sign_up():
     # Handle the form processing
     username = request.forms.get('username')
     password = request.forms.get('password')
+    public_key = request.forms.get('public_key')
     
     # Call the appropriate method
     response.set_cookie('username', username)
-    return model.sign_up_check(username, password)
+    response.set_cookie('public_key', public_key)
+    return model.sign_up_check(username, password, public_key)
 
 #-----------------------------------------------------------------------------
 
@@ -160,12 +165,53 @@ def get_logout_controller():
     '''
         get_logout
         
-        Logtout from current user
+        Logout from current user
     '''
     username = request.get_cookie('username')
+    response.delete_cookie('username')
     return model.logout(username)
 
 #-----------------------------------------------------------------------------
+
+# Friends
+@get('/friends')
+def get_logout_controller():
+    '''
+        Friends page
+        
+    '''
+
+    return model.friends()
+
+#-----------------------------------------------------------------------------
+
+@post('/send_message')
+def send_message():
+    recipient = request.forms.get('recipient')
+    message = request.forms.get('message')
+    sender = request.get_cookie('username')
+
+    #print("Recipient: " + recipient + " Message: " + message + " Sender: " + sender)
+    return model.send_message(recipient, message, sender)
+
+@get('/get_messages')
+def get_messages():
+    recipient = request.get_cookie('username')
+
+    messages = model.get_message(recipient)
+
+    # Convert the messages to JSON and return them
+    response.content_type = 'application/json'
+
+    return json.dumps(messages)
+
+@get('/get_public_key/<recipient>')
+def get_public_key(recipient):
+    public_key = model.get_public_key(recipient)
+
+    response.content_type = 'application/json'
+    #print(public_key)
+    return json.dumps({"public_key": public_key})
 
 @get('/about')
 def get_about():

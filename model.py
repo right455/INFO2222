@@ -9,6 +9,7 @@ import view
 import random
 import sql
 import crypto
+import json
 
 # Initialise our views, all arguments are defaults for the template
 page_view = view.View()
@@ -18,27 +19,36 @@ sql_db = sql.SQLDatabase(database_args)
 msg_db = sql.MSGDatabase(msg_args)
 sql_db.database_setup("password")
 msg_db.database_setup()
-#a, A = crypto.generate_keys()
-#sql_db.login_user("ashton", A)
-#sql_db.logout_user("ashton")
-#sql_db.get_users()
-#msg_db.add_message("admin", "ashton", "HELLO", sql_db)
-#msg_db.add_message("admin", "ashton", "There", sql_db)
-#msg_db.add_message("admin", "ashton", "Howdy", sql_db)
-#print(msg_db.get_messages("admin", "ashton", sql_db))
-#msg_db.print_table()
+
+#msg_db.add_message("123", "123", "hello", sql_db)
+#print(msg_db.get_messages("123", sql_db))
 
 #-----------------------------------------------------------------------------
 # Index
 #-----------------------------------------------------------------------------
 
-def index():
+def index(username):
     '''
         index
         Returns the view for the index
     '''
+    if username != None:
+        change_header("user")
+    else:
+        change_header("header")
+
     return page_view("index")
 
+def change_header(header):
+    if header == "user":
+        page_view.change_header("user")
+        return True
+    elif header == "header":
+        page_view.change_header("header")
+        return True
+    
+    print("ERROR: Invalid header")
+    return False
 
 #-----------------------------------------------------------------------------
 # Sign up
@@ -54,7 +64,7 @@ def sign_up_form():
 #-----------------------------------------------------------------------------
 
 # Check the sign up credentials
-def sign_up_check(username, password):
+def sign_up_check(username, password, public_key):
     '''
         sign_up_check
         Store usernames and passwords
@@ -65,15 +75,14 @@ def sign_up_check(username, password):
         Returns either a view for valid credentials, or a view for invalid credentials
     '''
 
-    sign_up =True
-    err_str="User already exists"
     sign_up = sql_db.add_user(username, password, 0)
     
     if sign_up:
-        sql_db.login_user(username)
-        page_view.change_header("user")
+        sql_db.login_user(username, public_key)
+        change_header("user")
         return page_view("valid", name=username)
     else:
+        err_str = "Invalid username, cannot have the same one as someone else"
         return page_view("invalid", reason=err_str)
 
 
@@ -91,7 +100,7 @@ def login_form():
 #-----------------------------------------------------------------------------
 
 # Check the login credentials
-def login_check(username, password):
+def login_check(username, password, public_key):
     '''
         login_check
         Checks usernames and passwords
@@ -118,7 +127,7 @@ def login_check(username, password):
         login = False
     
     if login:
-        sql_db.login_user(username)
+        sql_db.login_user(username, public_key)
         page_view.change_header("user")
         return page_view("valid", name=username)
     else:
@@ -150,8 +159,40 @@ def logout(username):
         Returns the view for the index after logout
     '''
     sql_db.logout_user(username)
-    page_view.change_header("header")
+    change_header("header")
     return page_view("index")
+
+#-----------------------------------------------------------------------------
+# Friends
+#-----------------------------------------------------------------------------
+def friends():
+    '''
+        Friends
+        Returns the view page for friends
+    '''
+
+    return page_view("friends")    
+
+def send_message(recipient, message, sender):
+    '''
+        Send message
+        Returns the view for the message after pressing send in friends
+    '''
+
+    if sql_db.check_user_exists(username=recipient) == False:
+        err_str = "Invalid recipient"
+        return page_view("invalid", reason=err_str)
+
+    msg_db.add_message(sender, recipient, message, sql_db)
+    msg_db.print_table()
+    return page_view("valid_message")  
+
+def get_message(recipient):
+    return msg_db.get_messages(recipient, sql_db)
+
+
+def get_public_key(username):
+    return sql_db.get_public_key(username)
 
 #-----------------------------------------------------------------------------
 # About

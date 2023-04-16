@@ -17,6 +17,7 @@ import os
 import sys
 import socket
 import gunicorn
+import sql
 from gevent import monkey; monkey.patch_all()
 from bottle import run
 
@@ -55,20 +56,6 @@ def run_server():
     run(host=host, port=port, debug=debug, interval=10, server='gevent', 
         reloader=False, certfile='./certificates/localhost.crt', 
         keyfile='./certificates/localhost.key')
-
-#-----------------------------------------------------------------------------
-# Optional SQL support
-# Comment out the current manage_db function, and 
-# uncomment the following one to load an SQLite3 database
-
-# def manage_db():
-#     '''
-#         Blank function for database support, use as needed
-#     '''
-#     pass
-
-
-import sql
     
 def manage_db():
     '''
